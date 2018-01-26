@@ -11,6 +11,7 @@ import android.content.Intent
 class DiscoveryViewModel : ViewModel {
     val error = MutableLiveData<String>()
     val status = MutableLiveData<State>()
+    val devices = MutableLiveData<List<Device>>()
 
     private val bluetoothAdapter: BluetoothAdapter?
 
@@ -30,6 +31,13 @@ class DiscoveryViewModel : ViewModel {
             if (!it.isEnabled) {
                 status.postValue(State.STATE_OFF)
             }
+        }
+    }
+
+    fun getDevices() {
+        bluetoothAdapter?.let {
+            val bondedDevices = it.bondedDevices.map { device -> Device(device.name, device.address, true) }
+            devices.postValue(bondedDevices)
         }
     }
 

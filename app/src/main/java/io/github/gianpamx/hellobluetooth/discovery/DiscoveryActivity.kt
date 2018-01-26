@@ -10,8 +10,10 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.Snackbar.LENGTH_INDEFINITE
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import io.github.gianpamx.hellobluetooth.R
+import kotlinx.android.synthetic.main.discovery_activity.*
 
 
 class DiscoveryActivity : AppCompatActivity() {
@@ -23,11 +25,19 @@ class DiscoveryActivity : AppCompatActivity() {
 
     lateinit var statusSnackbar: Snackbar
 
+    lateinit var adapter: DeviceAdapter
+
     lateinit var discoveryViewModel: DiscoveryViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.discovery_activity)
+
+        adapter = DeviceAdapter()
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.setHasFixedSize(true)
+        recyclerView.adapter = adapter
 
         val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         discoveryViewModel = ViewModelProviders.of(this, DiscoveryViewModel.Factory(bluetoothAdapter)).get(DiscoveryViewModel::class.java)
@@ -52,6 +62,13 @@ class DiscoveryActivity : AppCompatActivity() {
                 }
             }
         })
+
+        discoveryViewModel.devices.observe(this, Observer {
+            it?.let {
+                adapter.replaceDevices(it)
+            }
+        })
+        discoveryViewModel.getDevices()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
